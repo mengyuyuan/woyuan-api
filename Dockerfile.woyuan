@@ -1,0 +1,18 @@
+# Build the frontend on the workstation first: cd frontend && pnpm build
+# Build the Linux backend locally, preserving the upstream runtime and entrypoint.
+ARG GO_IMAGE=docker.m.daocloud.io/library/golang:1.27.2-alpine
+ARG BASE_IMAGE=weishaw/sub2api@sha256:44b59fc74b0b582750ef5f38146782db177767ef9d3f34351f1c75c157b1bb88
+FROM ${GO_IMAGE} AS builder
+ENV GOPROXY=https://goproxy.cn,direct GOSUMDB=sum.golang.google.cn CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+WORKDIR /src
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+COPY backend/ ./
+ARG VERSION=0.2.17-woyuan.1
+ARG COMMIT=060d016-woyuan
+RUN go build -p 2 -tags embed -trimpath -ldflags="-s -w -X main.Version=${VERSION} -X main.Commit=${COMMIT} -X main.BuildType=release" -o /tmp/sub2api ./cmd/server
+FROM ${BASE_IMAGE}
+LABEL org.opencontainers.image.title="我愿api" \
+      org.opencontainers.image.source="https://github.com/mengyuyuan/woyuan-api" \
+      org.opencontainers.image.version="0.2.17-woyuan.1"
+COPY --from=builder --chown=sub2api:sub2api /tmp/sub2api /app/sub2api

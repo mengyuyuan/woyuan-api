@@ -1,7 +1,8 @@
 import { sanitizeUrl } from '@/utils/url'
 
 export function updateFavicon(logoUrl: string): void {
-  const sanitizedLogoUrl = sanitizeUrl(logoUrl, {
+  // Use the light-backed mark for legible browser tabs in both OS themes.
+  const sanitizedLogoUrl = sanitizeUrl(logoUrl === '/brand/logo.png' ? '/logo.svg' : logoUrl, {
     allowRelative: true,
     allowDataUrl: true,
   })
@@ -16,6 +17,6 @@ export function updateFavicon(logoUrl: string): void {
     document.head.appendChild(link)
   }
 
-  link.type = sanitizedLogoUrl.endsWith('.svg') ? 'image/svg+xml' : 'image/x-icon'
+  link.type = sanitizedLogoUrl.endsWith('.svg') ? 'image/svg+xml' : sanitizedLogoUrl.endsWith('.png') ? 'image/png' : 'image/x-icon'
   link.href = sanitizedLogoUrl
 }

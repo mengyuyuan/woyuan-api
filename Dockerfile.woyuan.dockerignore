@@ -1,0 +1,9 @@
+**
+!backend/
+!backend/**
+backend/vendor/
+backend/config.yaml
+backend/.env*
+backend/**/node_modules/
+backend/**/*.log
+!Dockerfile.woyuan
