@@ -20,12 +20,6 @@ void main() {
     p+=cloud*(1.-settled);
     p.z+=sin(seed+t*.45)*.025;
     p.y+=sin(t*.5)*.04;
-    vec2 cursor=uPointer*vec2(2.4,2.4);
-    vec2 delta=p.xy-cursor;
-    float influence=(1.-smoothstep(0.,.7,length(delta)))*uHover;
-    p.xy+=normalize(delta+vec2(.001))*influence*.28;
-    p.z+=influence*.3;
-    vLight=influence;
     p.xy+=vec2(cos(seed+t*.1),sin(seed+t*.1))*uScroll*.28;
     vAlpha=mix(.18,1.,settled);
   } else {
@@ -38,8 +32,19 @@ void main() {
   float yaw=sin(t*.15)*.045+uPointer.x*.08;
   float c=cos(yaw),s=sin(yaw);
   p.xz=mat2(c,-s,s,c)*p.xz;
-  p.y+=uPointer.y*.04;
+  // Both axes use WebGL coordinates. The whole field follows the pointer gently.
+  p.xy+=uPointer*vec2(uAspect,1.)*.08;
   float depth=6.8-p.z+uScroll*.5;
+  if(uMode<.5) {
+    // Unproject the pointer onto this particle's depth after the view rotation.
+    vec2 cursor=uPointer*vec2(uAspect,1.)*depth/2.9;
+    vec2 delta=p.xy-cursor;
+    float influence=(1.-smoothstep(0.,.7,length(delta)))*uHover;
+    p.xy+=normalize(delta+vec2(.001))*influence*.16;
+    p.z+=influence*.12;
+    depth=6.8-p.z+uScroll*.5;
+    vLight=influence;
+  }
   gl_Position=vec4(p.x*2.9/uAspect,p.y*2.9,depth*1.004008-.200401,depth);
   gl_PointSize=(uMode<.5?2.05:1.3)*uDpr*6.8/depth;
 }
@@ -93,6 +98,9 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
     gl.uniform1f(uniforms.uDpr!, width / Math.max(1, canvas.value?.getBoundingClientRect().width || width))
     gl.uniform1f(uniforms.uAspect!, width / height)
     gl.uniform2f(uniforms.uPointer!, pointerX, pointerY)
+    // CSS uses downward-positive Y, while the shader uses upward-positive Y.
+    stage.value?.style.setProperty('--emblem-x', `${pointerX * 8}px`)
+    stage.value?.style.setProperty('--emblem-y', `${-pointerY * 5}px`)
     gl.enable(gl.DEPTH_TEST); gl.depthMask(true)
     for (let i = meshes.length - 1; i >= 0; i--) drawMesh(meshes[i]!, 0, i, gl.POINTS)
     gl.depthMask(false)
@@ -119,21 +127,19 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
   const toggle = () => { paused.value = !paused.value; sync() }
   const onPreference = () => {
     paused.value = preference?.matches === true
-    if (paused.value) { intro = 1; pointerX = pointerY = targetX = targetY = 0 }
+    if (paused.value) { intro = 1; pointerX = pointerY = targetX = targetY = hover = targetHover = 0 }
     sync()
   }
   const onPointer = (event: PointerEvent) => {
-    if (paused.value || event.pointerType === 'touch' || !stage.value) return
-    const rect = stage.value.getBoundingClientRect()
+    if (paused.value || event.pointerType === 'touch' || !canvas.value) return
+    const rect = canvas.value.getBoundingClientRect()
+    if (rect.width <= 0 || rect.height <= 0) return
     targetHover = 1
     targetX = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1))
-    targetY = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1))
-    stage.value.style.setProperty('--emblem-x', `${targetX * 8}px`)
-    stage.value.style.setProperty('--emblem-y', `${targetY * 5}px`)
+    targetY = Math.max(-1, Math.min(1, 1 - (event.clientY - rect.top) / rect.height * 2))
   }
   const onLeave = () => {
     targetX = targetY = targetHover = 0
-    stage.value?.style.removeProperty('--emblem-x'); stage.value?.style.removeProperty('--emblem-y')
   }
   const onScroll = () => {
     if (!stage.value || paused.value) return

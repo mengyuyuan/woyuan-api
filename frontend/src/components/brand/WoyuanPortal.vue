@@ -33,7 +33,7 @@ const { ready, paused, toggle } = usePortalScene(stage, canvas)
 .wy-art-label{font:9px ui-monospace!important;letter-spacing:1.5px!important;color:#747982!important}
 .wy-portal-canvas{position:absolute;inset:8% -8%;width:116%;height:84%;opacity:0;transition:opacity .6s;touch-action:pan-y}
 .wy-gpu-ready .wy-portal-canvas{opacity:1}.wy-gpu-ready .wy-portal-emblem{opacity:0}
-.wy-orbital-field{position:absolute;inset:7% -7%;pointer-events:none;transform:rotate(-5deg);animation:wy-orbit-drift 20s ease-in-out infinite}.wy-orbital-field svg{width:100%;height:100%;overflow:visible}.wy-orbit-trace{animation:wy-trace 12s linear infinite}
+.wy-orbital-field{position:absolute;inset:7% -7%;pointer-events:none;transform:translate(var(--emblem-x,0px),var(--emblem-y,0px)) rotate(-5deg);animation:wy-orbit-drift 20s ease-in-out infinite}.wy-orbital-field svg{width:100%;height:100%;overflow:visible}.wy-orbit-trace{animation:wy-trace 12s linear infinite}
 .wy-portal-emblem{position:absolute;inset:17% 20%;transition:opacity .7s;pointer-events:none}.wy-portal-emblem img{width:100%;height:100%;object-fit:contain}
 .wy-portal-axis{position:absolute;left:2%;top:40%;writing-mode:vertical-rl;transform:rotate(180deg);color:#9a9da6;font:8px ui-monospace;letter-spacing:1.3px;pointer-events:none}
 .wy-portal-bottom{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:12px;color:#686d77;font:10px ui-monospace;letter-spacing:.7px}
@@ -41,7 +41,7 @@ const { ready, paused, toggle } = usePortalScene(stage, canvas)
 .wy-motion-toggle{display:flex;align-items:center;gap:7px;padding:10px 8px;font-size:10px;letter-spacing:.5px;z-index:1;transition:color .2s}.wy-motion-toggle:hover{color:#2354f4}.wy-motion-toggle svg{width:10px;height:10px}
 .wy-portal-still .wy-orbital-field,.wy-portal-still .wy-orbit-trace{animation-play-state:paused}
 @keyframes wy-trace{to{stroke-dashoffset:-1108}}
-@keyframes wy-orbit-drift{50%{transform:rotate(8deg)}}
+@keyframes wy-orbit-drift{50%{transform:translate(var(--emblem-x,0px),var(--emblem-y,0px)) rotate(8deg)}}
 @media(max-width:1000px){.wy-portal-stage{height:470px!important}.wy-art-label{font-size:8px!important}.wy-portal-bottom{font-size:9px;letter-spacing:0}}
 @media(max-width:760px){.wy-portal-stage{height:450px!important;width:100%;max-width:500px;margin:30px 0 0}.wy-portal-canvas{inset:5% -5%;width:110%;height:90%}.wy-orbital-field{inset:10% -2%}.wy-portal-axis{font-size:7px}.wy-portal-bottom{font-size:9px}}
 @media(max-width:380px){.wy-portal-stage{height:400px!important;width:100%!important;margin-bottom:0}}
