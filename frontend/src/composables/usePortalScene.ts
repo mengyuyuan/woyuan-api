@@ -1,104 +1,58 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
 
-// A small WebGL scene: lit tubular arches, a perspective floor and a GPU particle field.
-// The geometry is local and procedural; no model, texture or animation library is downloaded.
+import emblemPoints from '@/assets/brand/emblem-points.json'
+
+// The supplied emblem becomes a field of particles. Cursor interaction is evaluated on the GPU.
 const vertexSource = `
 precision mediump float;
-attribute vec3 aPosition;
-attribute vec3 aNormal;
+attribute vec3 aPosition, aNormal;
 uniform vec2 uPointer;
-uniform float uTime, uScroll, uLayer, uMode, uAspect, uIntro;
-varying vec3 vNormal, vView;
-varying float vFade, vTravel;
-mat3 turn(float x, float y) {
-  float a=cos(x), b=sin(x), c=cos(y), d=sin(y);
-  return mat3(c,b*d,-a*d, 0.,a,b, d,-b*c,a*c);
-}
+uniform float uTime, uScroll, uMode, uAspect, uIntro, uHover, uDpr;
+varying float vAlpha, vLight;
 void main() {
-  vec3 p=aPosition;
   float t=uTime;
-  vFade=1.;
-  vTravel=0.;
-  if(uMode>0.5 && uMode<1.5) {
-    float flow=fract(aPosition.z+t*.045);
-    float angle=aPosition.x*6.28318+t*.19;
-    float radius=.35+pow(flow,.7)*2.65;
-    p=vec3(cos(angle)*radius, sin(angle)*radius*.8-.05, 1.8-flow*6.5);
-    p.xy+=uPointer*.22*sin(flow*3.14159);
-    p.y+=sin(t*.4+aPosition.y*20.)*.07;
-    vFade=sin(flow*3.14159)*(.35+aPosition.y*.65)*uIntro;
-    vTravel=flow;
-  } else if(uMode<.5) {
-    // Each arch opens from a compact cluster and then moves independently in depth.
-    p.xy*=mix(.72,1.,uIntro);
-    p.z+=sin(t*.45-uLayer*.6)*.12;
-    p.y+=sin(t*.35-uLayer*.5)*.035;
-    vTravel=aPosition.y*.4+t*.35-uLayer*.45;
+  vec3 p=aPosition;
+  float seed=aNormal.x*6.28318;
+  float settled=1.-pow(1.-uIntro,4.);
+  vLight=0.;
+  if(uMode<.5) {
+    vec3 cloud=vec3(cos(seed)*3.6,sin(seed)*3.6,sin(seed*2.)*2.);
+    p+=cloud*(1.-settled);
+    p.z+=sin(seed+t*.45)*.025;
+    p.y+=sin(t*.5)*.04;
+    vec2 cursor=uPointer*vec2(2.4,2.4);
+    vec2 delta=p.xy-cursor;
+    float influence=(1.-smoothstep(0.,.7,length(delta)))*uHover;
+    p.xy+=normalize(delta+vec2(.001))*influence*.28;
+    p.z+=influence*.3;
+    vLight=influence;
+    p.xy+=vec2(cos(seed+t*.1),sin(seed+t*.1))*uScroll*.28;
+    vAlpha=mix(.18,1.,settled);
+  } else {
+    float a=aPosition.x*6.28318+t*.06;
+    float r=1.8+aPosition.y*1.1;
+    p=vec3(cos(a)*r,sin(a)*r*.8,sin(a+t*.08)*.5-1.);
+    vAlpha=(.12+sin(seed+t*.5)*.07)*settled;
+    vLight=step(.93,aNormal.y);
   }
-  float yaw=.24+sin(t*.18)*.12+uPointer.x*.22+uScroll*.3;
-  float pitch=-.08+uPointer.y*.1;
-  mat3 rotation=turn(pitch,yaw);
-  p=rotation*p;
-  p.y+=.12-uScroll*.4;
-  float depth=7.5-p.z+uScroll*1.4;
-  gl_Position=vec4(p.x*3.0/uAspect,p.y*3.0,depth*1.004008-.200401,depth);
-  gl_PointSize=clamp((1.7+aPosition.y*2.3)*1.6/depth*5.,1.,5.);
-  vNormal=rotation*aNormal;
-  vView=vec3(0.,0.,7.5)-p;
+  float yaw=sin(t*.15)*.045+uPointer.x*.08;
+  float c=cos(yaw),s=sin(yaw);
+  p.xz=mat2(c,-s,s,c)*p.xz;
+  p.y+=uPointer.y*.04;
+  float depth=6.8-p.z+uScroll*.5;
+  gl_Position=vec4(p.x*2.9/uAspect,p.y*2.9,depth*1.004008-.200401,depth);
+  gl_PointSize=(uMode<.5?2.05:1.3)*uDpr*6.8/depth;
 }
 `
 const fragmentSource = `
 precision mediump float;
-uniform float uMode, uLayer, uTime, uIntro;
-varying vec3 vNormal, vView;
-varying float vFade, vTravel;
+varying float vAlpha,vLight;
 void main() {
-  if(uMode>1.5) { gl_FragColor=vec4(.57,.66,.84,.15*uIntro); return; }
-  if(uMode>.5) {
-    float r=length(gl_PointCoord-.5)*2.;
-    float alpha=(1.-smoothstep(.15,1.,r))*vFade*.8;
-    gl_FragColor=vec4(.12,.32,.94,alpha); return;
-  }
-  vec3 n=normalize(vNormal), view=normalize(vView);
-  float light=max(dot(n,normalize(vec3(-.5,1.,1.5))),0.);
-  float rim=pow(1.-abs(dot(n,view)),2.5);
-  float spec=pow(max(dot(reflect(-normalize(vec3(-.8,1.,2.)),n),view),0.),35.);
-  float band=pow(.5+.5*sin(vTravel*4.-uTime*.9),18.);
-  vec3 blue=vec3(.12,.29,.85), silver=vec3(.74,.8,.93);
-  vec3 base=mix(blue,silver,min(.9,uLayer*.16));
-  vec3 color=base*(.34+light*.66)+vec3(spec*.6)+vec3(.18,.32,.65)*rim+band*.12;
-  color=mix(vec3(.975,.98,.99),color,uIntro);
-  gl_FragColor=vec4(color,1.);
+  float radius=length(gl_PointCoord-.5)*2.;
+  float alpha=(1.-smoothstep(.45,1.,radius))*vAlpha;
+  gl_FragColor=vec4(mix(vec3(.055,.065,.08),vec3(.16,.34,.94),vLight),alpha);
 }
 `
-
-function archGeometry(layer: number) {
-  const positions: number[] = [], normals: number[] = []
-  const segments = 100, sides = 10
-  const radius = 1.23, leg = 2.05, curve = Math.PI * radius
-  const length = leg * 2 + curve
-  const tube = layer === 0 ? .062 : .035
-  const sample = (u: number, v: number) => {
-    const distance = u * length
-    let x: number, y: number, nx: number, ny: number
-    if (distance < leg) { x = -radius; y = -1.7 + distance; nx = -1; ny = 0 }
-    else if (distance < leg + curve) {
-      const angle = Math.PI - (distance - leg) / radius
-      nx = Math.cos(angle); ny = Math.sin(angle)
-      x = nx * radius; y = .35 + ny * radius
-    } else { x = radius; y = .35 - (distance - leg - curve); nx = 1; ny = 0 }
-    const a = v * Math.PI * 2, c = Math.cos(a), s = Math.sin(a)
-    return { p: [x + nx * c * tube, y + ny * c * tube, .9 - layer * .67 + s * tube], n: [nx * c, ny * c, s] }
-  }
-  for (let i = 0; i < segments; i++) {
-    for (let j = 0; j < sides; j++) {
-      const a = sample(i / segments, j / sides), b = sample((i + 1) / segments, j / sides)
-      const c = sample((i + 1) / segments, (j + 1) / sides), d = sample(i / segments, (j + 1) / sides)
-      for (const point of [a, b, c, a, c, d]) { positions.push(...point.p); normals.push(...point.n) }
-    }
-  }
-  return { positions, normals }
-}
 
 export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLCanvasElement | null>) {
   const ready = ref(false), paused = ref(false)
@@ -108,13 +62,13 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
   let preference: MediaQueryList | undefined
   let visible = true, lost = false, stopped = false
   let time = 0, last = 0, intro = 0, scroll = 0, width = 1, height = 1
-  let pointerX = 0, pointerY = 0, targetX = 0, targetY = 0
+  let pointerX = 0, pointerY = 0, targetX = 0, targetY = 0, hover = 0, targetHover = 0
   const buffers: WebGLBuffer[] = []
   const shaders: WebGLShader[] = []
   const meshes: { position: WebGLBuffer; normal: WebGLBuffer; count: number }[] = []
   const uniforms: Record<string, WebGLUniformLocation | null> = {}
   let positionAttribute = -1, normalAttribute = -1
-  let particles: typeof meshes[number] | undefined, floor: typeof meshes[number] | undefined
+  let particles: typeof meshes[number] | undefined
 
   const cancel = () => { cancelAnimationFrame(raf); raf = 0; last = 0 }
   const canAnimate = () => !paused.value && visible && !document.hidden && !lost && !stopped
@@ -124,7 +78,7 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
     gl.vertexAttribPointer(positionAttribute, 3, gl.FLOAT, false, 0, 0)
     gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normal)
     gl.vertexAttribPointer(normalAttribute, 3, gl.FLOAT, false, 0, 0)
-    gl.uniform1f(uniforms.uMode!, mode); gl.uniform1f(uniforms.uLayer!, layer)
+    gl.uniform1f(uniforms.uMode!, mode); void layer
     gl.drawArrays(primitive, 0, mesh.count)
   }
   const draw = () => {
@@ -135,12 +89,13 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
     gl.uniform1f(uniforms.uTime!, time)
     gl.uniform1f(uniforms.uScroll!, scroll)
     gl.uniform1f(uniforms.uIntro!, intro)
+    gl.uniform1f(uniforms.uHover!, hover)
+    gl.uniform1f(uniforms.uDpr!, width / Math.max(1, canvas.value?.getBoundingClientRect().width || width))
     gl.uniform1f(uniforms.uAspect!, width / height)
     gl.uniform2f(uniforms.uPointer!, pointerX, pointerY)
     gl.enable(gl.DEPTH_TEST); gl.depthMask(true)
-    for (let i = meshes.length - 1; i >= 0; i--) drawMesh(meshes[i]!, 0, i, gl.TRIANGLES)
+    for (let i = meshes.length - 1; i >= 0; i--) drawMesh(meshes[i]!, 0, i, gl.POINTS)
     gl.depthMask(false)
-    if (floor) drawMesh(floor, 2, 0, gl.LINES)
     if (particles) drawMesh(particles, 1, 0, gl.POINTS)
     gl.depthMask(true)
   }
@@ -153,6 +108,7 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
     const easing = 1 - Math.exp(-dt * 3)
     pointerX += (targetX - pointerX) * easing
     pointerY += (targetY - pointerY) * easing
+    hover += (targetHover - hover) * easing
     draw()
     raf = requestAnimationFrame(frame)
   }
@@ -169,13 +125,14 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
   const onPointer = (event: PointerEvent) => {
     if (paused.value || event.pointerType === 'touch' || !stage.value) return
     const rect = stage.value.getBoundingClientRect()
+    targetHover = 1
     targetX = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1))
     targetY = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1))
     stage.value.style.setProperty('--emblem-x', `${targetX * 8}px`)
     stage.value.style.setProperty('--emblem-y', `${targetY * 5}px`)
   }
   const onLeave = () => {
-    targetX = targetY = 0
+    targetX = targetY = targetHover = 0
     stage.value?.style.removeProperty('--emblem-x'); stage.value?.style.removeProperty('--emblem-y')
   }
   const onScroll = () => {
@@ -216,7 +173,7 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
       gl.linkProgram(program)
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) || 'Program linking failed')
       positionAttribute = gl.getAttribLocation(program, 'aPosition'); normalAttribute = gl.getAttribLocation(program, 'aNormal')
-      for (const name of ['uPointer', 'uTime', 'uScroll', 'uLayer', 'uMode', 'uAspect', 'uIntro']) uniforms[name] = gl.getUniformLocation(program, name)
+      for (const name of ['uPointer', 'uTime', 'uScroll', 'uMode', 'uAspect', 'uIntro', 'uHover', 'uDpr']) uniforms[name] = gl.getUniformLocation(program, name)
       const mesh = (positions: number[], normals = new Array(positions.length).fill(0)) => {
         const upload = (data: number[]) => {
           const buffer = gl!.createBuffer()
@@ -227,18 +184,15 @@ export function usePortalScene(stage: Ref<HTMLElement | null>, canvas: Ref<HTMLC
         }
         return { position: upload(positions), normal: upload(normals), count: positions.length / 3 }
       }
-      for (let i = 0; i < 6; i++) { const arch = archGeometry(i); meshes.push(mesh(arch.positions, arch.normals)) }
-      const points: number[] = []
-      const count = window.matchMedia('(pointer: coarse)').matches ? 220 : 520
-      // Deterministic seeds keep the composition stable across reloads.
-      for (let i = 0; i < count; i++) points.push((i * .61803398875) % 1, (i * .754877666) % 1, i / count)
-      particles = mesh(points)
-      const grid: number[] = []
-      for (let i = -8; i <= 8; i++) {
-        grid.push(i * .45, -1.78, -5, i * .45, -1.78, 3)
-        grid.push(-3.6, -1.78, i * .5, 3.6, -1.78, i * .5)
+      const seeds: number[] = []
+      for (let i = 0; i < emblemPoints.length / 3; i++) seeds.push((i * .61803398875) % 1, (i * .754877666) % 1, 0)
+      meshes.push(mesh(emblemPoints, seeds))
+      const points: number[] = [], dustSeeds: number[] = []
+      for (let i = 0; i < 280; i++) {
+        points.push((i * .61803398875) % 1, (i * .754877666) % 1, 0)
+        dustSeeds.push((i * .41421356) % 1, (i * .7320508) % 1, 0)
       }
-      floor = mesh(grid)
+      particles = mesh(points, dustSeeds)
       gl.enableVertexAttribArray(positionAttribute); gl.enableVertexAttribArray(normalAttribute)
       gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
       gl.clearColor(0, 0, 0, 0)

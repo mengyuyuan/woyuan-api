@@ -20,15 +20,15 @@
     <main>
       <section class="wy-hero">
         <div class="wy-hero-copy">
-          <p class="wy-eyebrow"><span></span> {{ en ? 'AN OPENING TO YOUR NEXT WORLD' : '世于我愿 · 练习造世界' }}</p>
-          <h1 v-if="!en"><span class="wy-heading-line"><span>让想象，</span></span><span class="wy-heading-line"><span>有了<span class="wy-blue">接口。</span></span></span></h1>
-          <h1 v-else><span class="wy-heading-line"><span>Ideas in.</span></span><span class="wy-heading-line"><span class="wy-blue">Worlds out.</span></span></h1>
-          <p class="wy-hero-description">{{ en ? 'Connect intelligence to what comes next. One API for your applications, creative tools, and worlds yet to be built.' : '把智能接入你的下一个想法。\n从一行代码，到一个应用，再到尚未诞生的世界。' }}</p>
+          <p class="wy-eyebrow"><span></span> {{ en ? 'A LITTLE INTELLIGENCE. A WORLD OF POSSIBILITY.' : '我愿api / 为想象接入智能' }}</p>
+          <h1 v-if="!en"><span class="wy-heading-line"><span>让想象，</span></span><span class="wy-heading-line"><span><span class="wy-blue">自由发生。</span></span></span></h1>
+          <h1 v-else><span class="wy-heading-line"><span>Imagine.</span></span><span class="wy-heading-line"><span class="wy-blue">Make it real.</span></span></h1>
+          <p class="wy-hero-description">{{ en ? 'Connect intelligence to what comes next. One API for your applications, creative tools, and worlds yet to be built.' : '让智能成为创造的延伸。\n从一个想法出发，连接尚未诞生的世界。' }}</p>
           <div class="wy-hero-actions">
             <router-link :to="destination" class="wy-button">{{ en ? 'Start building' : '开始构建' }}<span aria-hidden="true">↗</span></router-link>
             <a href="#connect" class="wy-text-link">{{ en ? 'See how it works' : '看看如何接入' }}<span aria-hidden="true">↓</span></a>
           </div>
-          <div class="wy-hero-note"><span class="wy-cross" aria-hidden="true">+</span>{{ en ? 'ONE CONNECTION. ENDLESS POSSIBILITIES.' : '一个入口，通往更多可能。' }}</div>
+          <div class="wy-hero-note"><span class="wy-cross" aria-hidden="true">+</span>{{ en ? 'ONE CONNECTION. ENDLESS POSSIBILITIES.' : 'ONE API. YOUR NEXT POSSIBILITY.' }}</div>
         </div>
         <WoyuanPortal :logo="siteLogo" :en="en" />
       </section>
@@ -109,3 +109,4 @@ async function copyCode() {
 </script>
 
 <style src="@/styles/woyuan-landing.css"></style>
+<style src="@/styles/woyuan-editorial.css"></style>
