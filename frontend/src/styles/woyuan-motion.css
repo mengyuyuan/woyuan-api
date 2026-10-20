@@ -29,3 +29,12 @@
 @media(hover:none),(pointer:coarse){.wy-portal-scene{transform:none!important}.wy-button,.wy-button:hover{transform:none!important}.wy-portal-core img{animation-duration:10s}.wy-orbit{animation:none}}
 @media(prefers-reduced-motion:reduce){.wy-landing *,.wy-auth *,.wy-workspace *{animation:none!important;transition:none!important;scroll-behavior:auto!important}.wy-motion-ready [data-reveal]{opacity:1!important;transform:none!important}.wy-portal-scene{transform:none!important}}
 .wy-reduced-motion [data-reveal]{opacity:1!important;transform:none!important}.wy-reduced-motion *{animation:none!important;transition:none!important}
+.wy-motion-ready .wy-feature.wy-revealed,.wy-motion-ready .wy-code-card.wy-revealed{transform:perspective(1000px) rotateX(var(--card-rx,0deg)) rotateY(var(--card-ry,0deg));transition:transform .7s cubic-bezier(.16,1,.3,1),opacity .9s,background .3s;transition-delay:0s}
+.wy-feature-top::after{content:"";position:absolute;left:24px;right:24px;top:78px;height:1px;background:linear-gradient(90deg,transparent,#2354f450,transparent);transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.16,1,.3,1)}.wy-feature:hover .wy-feature-top::after{transform:scaleX(1)}
+.wy-manifesto-line{display:block;white-space:pre-wrap}.wy-manifesto-line>span{display:inline-block;opacity:clamp(.2,calc(var(--manifesto-progress,1) * 2.4 - var(--char) * 1.4),1);transition:opacity .18s linear}
+.wy-manifesto::after{content:"";position:absolute;right:-12%;top:-40%;width:70%;aspect-ratio:1;border:1px solid #2354f41a;border-radius:50%;box-shadow:0 0 0 40px #2354f405,0 0 0 80px #2354f405;transform:translateY(calc((1 - var(--manifesto-progress,1)) * 100px)) rotate(-25deg);pointer-events:none;z-index:-1}
+.wy-hero h1 .wy-blue{background:linear-gradient(100deg,#2354f4 20%,#649dff 45%,#2354f4 65%);background-size:230% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;animation:wy-blue-light 8s 2s ease-in-out infinite}
+@keyframes wy-blue-light{0%,100%{background-position:100% 50%}50%{background-position:0 50%}}
+@media(hover:none),(pointer:coarse){.wy-motion-ready .wy-feature.wy-revealed,.wy-motion-ready .wy-code-card.wy-revealed{transform:none}}
+@media(prefers-reduced-motion:reduce){.wy-manifesto-line>span{opacity:1}.wy-manifesto::after{transform:none}.wy-motion-ready .wy-feature.wy-revealed,.wy-motion-ready .wy-code-card.wy-revealed{transform:none}}
+.wy-reduced-motion .wy-manifesto-line>span{opacity:1}

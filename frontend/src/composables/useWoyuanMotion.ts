@@ -12,6 +12,7 @@ export function useWoyuanMotion(root: Ref<HTMLElement | null>) {
   let y = 0
   let target: HTMLElement | null = null
   let activeButton: HTMLElement | null = null
+  let activeCard: HTMLElement | null = null
 
   const resetButton = () => {
     activeButton?.style.removeProperty('--magnetic-x')
@@ -32,10 +33,17 @@ export function useWoyuanMotion(root: Ref<HTMLElement | null>) {
       scene.style.setProperty('--tilt-y', `${-py * 4}deg`)
     }
     const card = target?.closest<HTMLElement>('.wy-feature, .wy-code-card')
+    if (activeCard && activeCard !== card) {
+      activeCard.style.removeProperty('--card-rx')
+      activeCard.style.removeProperty('--card-ry')
+    }
+    activeCard = card ?? null
     if (card) {
       const bounds = card.getBoundingClientRect()
       card.style.setProperty('--spot-x', `${x - bounds.left}px`)
       card.style.setProperty('--spot-y', `${y - bounds.top}px`)
+      card.style.setProperty('--card-rx', `${-(y - bounds.top - bounds.height / 2) / bounds.height * 4}deg`)
+      card.style.setProperty('--card-ry', `${(x - bounds.left - bounds.width / 2) / bounds.width * 5}deg`)
     }
     const button = target?.closest<HTMLElement>('.wy-button') ?? null
     if (button !== activeButton) resetButton()
@@ -55,6 +63,9 @@ export function useWoyuanMotion(root: Ref<HTMLElement | null>) {
   }
   const onLeave = () => {
     resetButton()
+    activeCard?.style.removeProperty('--card-rx')
+    activeCard?.style.removeProperty('--card-ry')
+    activeCard = null
     const scene = root.value?.querySelector<HTMLElement>('.wy-portal-scene')
     scene?.style.setProperty('--tilt-x', '0deg')
     scene?.style.setProperty('--tilt-y', '0deg')
@@ -63,6 +74,12 @@ export function useWoyuanMotion(root: Ref<HTMLElement | null>) {
     scrollFrame = 0
     const max = document.documentElement.scrollHeight - window.innerHeight
     root.value?.style.setProperty('--read-progress', `${max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0}`)
+    const manifesto = root.value?.querySelector<HTMLElement>('.wy-manifesto')
+    if (manifesto) {
+      const top = manifesto.getBoundingClientRect().top
+      const progress = Math.max(0, Math.min(1, (window.innerHeight * .95 - top) / (window.innerHeight * .65)))
+      manifesto.style.setProperty('--manifesto-progress', `${progress}`)
+    }
   }
   const onScroll = () => { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScroll) }
   const onVisibility = () => { root.value?.classList.toggle('wy-paused', document.hidden) }

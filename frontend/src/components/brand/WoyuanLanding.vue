@@ -30,18 +30,7 @@
           </div>
           <div class="wy-hero-note"><span class="wy-cross" aria-hidden="true">+</span>{{ en ? 'ONE CONNECTION. ENDLESS POSSIBILITIES.' : '一个入口，通往更多可能。' }}</div>
         </div>
-        <div class="wy-portal-art" aria-hidden="true">
-          <div class="wy-art-label">FIG. 01 <span>THE POSSIBILITY PORTAL</span></div>
-          <div class="wy-portal-scene"><div class="wy-portal-grid"></div>
-          <div class="wy-orbit wy-orbit-one"></div><div class="wy-orbit wy-orbit-two"></div>
-          <div class="wy-portal wy-portal-one"></div><div class="wy-portal wy-portal-two"></div><div class="wy-portal wy-portal-three"></div>
-          <div class="wy-portal-core"><img :src="siteLogo || '/brand/logo.png'" alt="" /></div>
-          <div class="wy-floor"><i v-for="n in 6" :key="n" :style="{ '--step': n }"></i></div>
-          <span class="wy-art-coordinate wy-coordinate-top">X 00.000 / Y ∞</span>
-          <span class="wy-art-coordinate wy-coordinate-bottom">IMAGINATION → REALITY</span>
-          <span class="wy-art-plus">+</span></div>
-          <div class="wy-art-caption"><span></span> {{ en ? 'YOUR NEXT IDEA STARTS HERE' : '下一种可能，由你开启' }}</div>
-        </div>
+        <WoyuanPortal :logo="siteLogo" :en="en" />
       </section>
 
       <section class="wy-model-strip" aria-label="模型生态">
@@ -79,7 +68,7 @@ response = client.chat.completions.create(
 <span class="wy-code-purple">print</span>(response.choices[0].message.content)</code></pre><div class="wy-code-foot"><span>PYTHON / OPENAI SDK</span><span>{{ en ? 'Replace your-model with an available model' : '请将 your-model 替换为已开放的模型名称' }}</span></div><p v-if="copyError" class="wy-copy-error" role="status">{{ en ? 'Select and copy the code above.' : '请选中上方代码手动复制。' }}</p></div>
       </section>
 
-      <section class="wy-manifesto" data-reveal><span class="wy-eyebrow">SHI YU WO YUAN / A WORLD IN THE MAKING</span><h2>{{ en ? 'The world we imagine,\nbegins with what we make.' : '世界，\n始于我愿。' }}</h2><div><p>{{ en ? 'We are practicing building worlds. Every useful tool, every working idea, is another step.' : '我们在练习造世界。\n每一个有用的工具，每一个落地的想法，\n都是通往那个世界的一步。' }}</p><router-link :to="destination" class="wy-button">{{ en ? 'Make your next move' : '迈出你的下一步' }}<span aria-hidden="true">↗</span></router-link></div><img :src="siteLogo || '/brand/logo.png'" alt="" aria-hidden="true" /></section>
+      <section class="wy-manifesto" data-reveal><span class="wy-eyebrow">SHI YU WO YUAN / A WORLD IN THE MAKING</span><h2 class="wy-scroll-type" :aria-label="manifestoLines.join(' ')"><span v-for="(line, row) in manifestoLines" :key="row" class="wy-manifesto-line" aria-hidden="true"><span v-for="(letter, index) in line" :key="index" :style="{ '--char': (manifestoLines.slice(0, row).join('').length + index) / manifestoLength }">{{ letter === ' ' ? '\u00a0' : letter }}</span></span></h2><div><p>{{ en ? 'We are practicing building worlds. Every useful tool, every working idea, is another step.' : '我们在练习造世界。\n每一个有用的工具，每一个落地的想法，\n都是通往那个世界的一步。' }}</p><router-link :to="destination" class="wy-button">{{ en ? 'Make your next move' : '迈出你的下一步' }}<span aria-hidden="true">↗</span></router-link></div><img :src="siteLogo || '/brand/logo.png'" alt="" aria-hidden="true" /></section>
     </main>
     <footer class="wy-footer"><router-link to="/home" class="wy-footer-brand"><img :src="siteLogo || '/brand/logo.png'" alt="" />{{ siteName }}</router-link><span>© {{ new Date().getFullYear() }} 世于我愿 · MAKE WHAT YOU IMAGINE.</span><div><router-link v-if="showModelPlazaEntry" to="/model-plaza">{{ en ? 'Models' : '模型广场' }} ↗</router-link><a href="https://github.com/mengyuyuan/woyuan-api" target="_blank" rel="noopener noreferrer">{{ en ? 'Source & credits' : '开源与致谢' }} ↗</a></div></footer>
   </div>
@@ -91,6 +80,7 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
+import WoyuanPortal from './WoyuanPortal.vue'
 import { sanitizeUrl } from '@/utils/url'
 import { useWoyuanMotion } from '@/composables/useWoyuanMotion'
 
@@ -100,6 +90,8 @@ useWoyuanMotion(landingRoot)
 const props = defineProps<{ siteName: string; siteLogo: string; dashboardPath: string; isAuthenticated: boolean; showModelPlazaEntry: boolean; docUrl: string }>()
 const { locale } = useI18n()
 const en = computed(() => locale.value === 'en')
+const manifestoLines = computed(() => (en.value ? 'The world we imagine,\nbegins with what we make.' : '世界，\n始于我愿。').split('\n'))
+const manifestoLength = computed(() => manifestoLines.value.join('').length)
 const appStore = useAppStore()
 const destination = computed(() => props.isAuthenticated ? props.dashboardPath : '/login')
 const baseUrl = computed(() => {

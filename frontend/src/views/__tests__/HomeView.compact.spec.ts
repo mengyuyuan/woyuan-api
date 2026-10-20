@@ -75,6 +75,7 @@ describe('HomeView compact mode', () => {
     appStore.fetchPublicSettings.mockClear()
     localStorage.clear()
     vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList)
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
   })
 
   it('renders custom HTML ahead of compact mode', () => {
