@@ -22,8 +22,8 @@ cd frontend
 npx pnpm@9.15.9 install --frozen-lockfile
 npx pnpm@9.15.9 build
 cd ..
-docker build -f Dockerfile.woyuan -t woyuan-api:0.2.17-woyuan.6 .
-docker save woyuan-api:0.2.17-woyuan.6 | gzip > woyuan-api-image.tar.gz
+docker build -f Dockerfile.woyuan -t woyuan-api:0.2.17-woyuan.7 .
+docker save woyuan-api:0.2.17-woyuan.7 | gzip > woyuan-api-image.tar.gz
 ```
 
 `Dockerfile.woyuan` 将本地构建的前端嵌入 Linux/amd64 后端，并继承固定摘要的上游运行时。若镜像仓库无法访问，可以在生产机 `docker save` 导出现有上游镜像，在本地载入并指定 `--build-arg BASE_IMAGE=<本地镜像标签>`。

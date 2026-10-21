@@ -15,8 +15,8 @@
 /* Individual catalogue cards: a square canvas, generous typography and quiet blue light. */
 .wy-plaza .wy-plaza-group,.wy-plaza .wy-plaza-group:hover{border:0;background:transparent;border-radius:0;box-shadow:none}
 .wy-plaza .wy-plaza-group-header{padding:8px 0 22px;background:transparent;border:0}
-.wy-model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:18px}
-.wy-model-card{position:relative;isolation:isolate;display:flex;flex-direction:column;aspect-ratio:1;min-width:0;padding:25px 24px 0;border:1px solid #e0e5ed;border-radius:4px;background:linear-gradient(145deg,#fff 55%,#f4f7fd);box-shadow:0 3px 12px #223a6403;transition:transform .3s cubic-bezier(.2,.65,.3,1),border-color .3s,box-shadow .3s}
+.wy-model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:18px}
+.wy-model-card{position:relative;isolation:isolate;container-type:inline-size;min-height:0;display:flex;flex-direction:column;aspect-ratio:1;min-width:0;padding:25px 24px 0;border:1px solid #e0e5ed;border-radius:4px;background:linear-gradient(145deg,#fff 55%,#f4f7fd);box-shadow:0 3px 12px #223a6403;transition:transform .3s cubic-bezier(.2,.65,.3,1),border-color .3s,box-shadow .3s}
 .wy-model-card::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 100% 0%,#dce9ff99,transparent 65%);opacity:0;transition:opacity .4s;pointer-events:none}
 .wy-model-card:hover,.wy-model-card:focus-within{transform:translateY(-4px);border-color:#a7bfe8;box-shadow:0 14px 34px #2d528512}
 .wy-model-card:hover::before,.wy-model-card:focus-within::before{opacity:1}
@@ -51,4 +51,5 @@
 .dark .wy-model-card{background:linear-gradient(145deg,#1a2230 55%,#1b2a40);border-color:#344156}.dark .wy-model-card:hover,.dark .wy-model-card:focus-within{border-color:#5c7aab;box-shadow:0 14px 34px #0002}.dark .wy-model-card::before{background:radial-gradient(ellipse at 100% 0%,#426baf44,transparent 65%)}.dark .wy-model-provider,.dark .wy-model-card-title h3{color:#e1e8f3}.dark .wy-model-card-title>p,.dark .wy-model-price-caption{color:#8b9bb4}.dark .wy-model-price-pair dd{color:#d7e5ff}.dark .wy-model-price-pair>div+div,.dark .wy-model-card-footer{border-color:#344156}.dark .wy-model-copy:hover{background:#243650;border-color:#3e5880;color:#b7cfff}.dark .wy-model-card-footer button{color:#a7bfe5}
 @media(min-width:1500px){.wy-model-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}}
 @media(max-width:760px){.wy-model-grid{gap:16px}.wy-model-card{padding:26px 25px 0}.wy-model-card-title h3{font-size:22px}.wy-model-price-pair dd{font-size:27px}.wy-plaza .wy-plaza-group-header{padding:5px 0 18px}}
+@container(max-width:310px){.wy-model-card-title{margin-top:16px}.wy-model-card-title h3{font-size:18px;line-height:1.3}.wy-model-card-title>p{display:none}.wy-model-card-pricing{padding-top:12px;padding-bottom:12px}.wy-model-price-caption{margin-bottom:8px}.wy-model-price-pair dt{font-size:10px;margin-bottom:3px}.wy-model-price-pair dd{font-size:22px}.wy-model-price-unit{margin-top:6px}.wy-model-card-footer{min-height:40px}}
 @media(prefers-reduced-motion:reduce){.wy-plaza *,.wy-plaza *::before{transition:none!important;scroll-behavior:auto!important}.wy-model-card:hover,.wy-model-card:focus-within{transform:none}}
