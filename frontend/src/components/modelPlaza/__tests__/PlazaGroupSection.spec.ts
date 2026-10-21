@@ -76,58 +76,62 @@ function group(overrides: Partial<ModelPlazaGroup> = {}): ModelPlazaGroup {
   }
 }
 
-function mountSection(g: ModelPlazaGroup) {
-  return mount(PlazaGroupSection, {
+async function mountSection(g: ModelPlazaGroup) {
+  const wrapper = mount(PlazaGroupSection, {
     props: { group: g },
     global: {
       stubs: {
         GroupBadge: true,
         Icon: true,
-        PlazaModelPricingTable: true
+        PlazaModelPricingTable: true,
+        PlazaModelCard: { props: ['model'], template: `<button @click="$emit('details', model)">details</button>` },
+        BaseDialog: { template: '<div><slot /></div>' }
       }
     }
   })
+  await wrapper.find('button').trigger('click')
+  return wrapper
 }
 
 const NOTE = 'modelPlaza.detail.longContextDisabledNote'
 
 describe('PlazaGroupSection 长上下文说明', () => {
-  it('passes video-specific rates to the pricing table', () => {
-    const wrapper = mountSection(group({ video_rate_independent: true, video_rate_multiplier: 0 }))
+  it('passes video-specific rates to the pricing table', async () => {
+    const wrapper = await mountSection(group({ video_rate_independent: true, video_rate_multiplier: 0 }))
     expect(wrapper.findComponent(PlazaModelPricingTable).props()).toMatchObject({
       videoRateIndependent: true,
       videoRateMultiplier: 0
     })
     wrapper.unmount()
   })
-  it('分组关闭阶梯且组内有官方阶梯模型时显示说明', () => {
-    const wrapper = mountSection(group({ long_context_pricing_enabled: false }))
+  it('分组关闭阶梯且组内有官方阶梯模型时显示说明', async () => {
+    const wrapper = await mountSection(group({ long_context_pricing_enabled: false }))
     expect(wrapper.text()).toContain(NOTE)
   })
 
-  it('分组开启阶梯时不显示', () => {
-    const wrapper = mountSection(group({ long_context_pricing_enabled: true }))
+  it('分组开启阶梯时不显示', async () => {
+    const wrapper = await mountSection(group({ long_context_pricing_enabled: true }))
     expect(wrapper.text()).not.toContain(NOTE)
   })
 
-  it('分组关闭但没有官方阶梯模型时不显示', () => {
-    const wrapper = mountSection(
+  it('分组关闭但没有官方阶梯模型时不显示', async () => {
+    const wrapper = await mountSection(
       group({ long_context_pricing_enabled: false, models: [ladderModel(1)] })
     )
     expect(wrapper.text()).not.toContain(NOTE)
   })
 
-  it('旧后端缺少开关字段时不显示', () => {
+  it('旧后端缺少开关字段时不显示', async () => {
     const g = group()
     delete (g as Partial<ModelPlazaGroup>).long_context_pricing_enabled
-    const wrapper = mountSection(g)
+    const wrapper = await mountSection(g)
     expect(wrapper.text()).not.toContain(NOTE)
   })
 })
 
 describe('PlazaGroupSection 高峰配置传递', () => {
-  it('分组启用高峰时把窗口描述与倍率传给价格表', () => {
-    const wrapper = mountSection(
+  it('分组启用高峰时把窗口描述与倍率传给价格表', async () => {
+    const wrapper = await mountSection(
       group({
         subscription_type: 'subscription',
         peak_rate_enabled: true,
@@ -142,8 +146,8 @@ describe('PlazaGroupSection 高峰配置传递', () => {
     expect(table.props('peakRateMultiplier')).toBe(1.5)
   })
 
-  it('分组未启用高峰时窗口描述为空串', () => {
-    const wrapper = mountSection(group())
+  it('分组未启用高峰时窗口描述为空串', async () => {
+    const wrapper = await mountSection(group())
     expect(wrapper.findComponent(PlazaModelPricingTable).props('peakWindow')).toBe('')
   })
 })

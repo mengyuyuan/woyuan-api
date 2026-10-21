@@ -8,7 +8,7 @@
 
 - 黑白纸感、轻字重排版与少量冷蓝光迹 `#2354f4`。
 - 首页、认证页面、控制台、公开页面、浏览器图标使用统一标志。
-- 模型广场使用统一的冷灰卡片、黑白筛选标签与冰蓝价格区，公开页和后台内嵌页保持一致，支持深色模式与移动端横向查看价格。
+- 模型广场以每款模型一张 1:1 方卡展示：黑白银灰、细边框、冰蓝价格，支持复制模型名与完整价格详情。卡片和详情复用同一计价逻辑，公开页和后台内嵌页保持一致，支持深色模式与移动端。
 - 原生 WebGL 标志粒子场：3931 个采样自品牌图标的粒子由散聚形，整体同向轻跟随光标，局部粒子排斥、显色并缓慢归位；配合细轨迹、轻微空间转动、滚动显影与磁吸按钮。
 - 支持暂停/开启三维动效。遵循减少动态效果设置，触屏限制像素密度；离开视口或标签页隐藏时停止渲染；离开页面释放 GPU 资源。WebGL 不可用或上下文丢失时显示原始品牌标志，恢复后重建。
 - Logo 原始图由品牌所有者提供，使用 imagegen 提取为透明图标。品牌素材不随上游项目的开源许可授予商标或品牌使用权。
@@ -22,8 +22,8 @@ cd frontend
 npx pnpm@9.15.9 install --frozen-lockfile
 npx pnpm@9.15.9 build
 cd ..
-docker build -f Dockerfile.woyuan -t woyuan-api:0.2.17-woyuan.5 .
-docker save woyuan-api:0.2.17-woyuan.5 | gzip > woyuan-api-image.tar.gz
+docker build -f Dockerfile.woyuan -t woyuan-api:0.2.17-woyuan.6 .
+docker save woyuan-api:0.2.17-woyuan.6 | gzip > woyuan-api-image.tar.gz
 ```
 
 `Dockerfile.woyuan` 将本地构建的前端嵌入 Linux/amd64 后端，并继承固定摘要的上游运行时。若镜像仓库无法访问，可以在生产机 `docker save` 导出现有上游镜像，在本地载入并指定 `--build-arg BASE_IMAGE=<本地镜像标签>`。

@@ -1,6 +1,6 @@
 <template>
   <section
-    class="wy-plaza-group overflow-hidden rounded-2xl border bg-white dark:bg-dark-800/50"
+    class="wy-plaza-group"
   >
     <!-- 分组头部:名称/平台/倍率徽章/专属/订阅徽章 + 描述 -->
     <header class="wy-plaza-group-header border-b border-gray-100 px-5 py-4 dark:border-dark-700/60">
@@ -55,11 +55,16 @@
       </p>
     </header>
 
-    <!-- 模型价格表:整行(含 hover 底色/分区底色)顶到卡片边缘,左右留白由表格首列/末列的 padding 提供 -->
-    <div>
+    <div v-if="group.models.length" class="wy-model-grid">
+      <PlazaModelCard v-for="model in sortedModels" :key="`${model.platform}:${model.name}`" :model="model" :group="group" @details="selectedModel = $event" />
+    </div>
+    <p v-else class="py-8 text-center text-sm text-gray-400">{{ t('modelPlaza.detail.noModels') }}</p>
+    <BaseDialog :show="!!selectedModel" :title="selectedModel?.name || ''" width="extra-wide" @close="selectedModel = null">
+      <div class="wy-plaza wy-price-dialog">
+        <p class="wy-price-dialog-note">{{ group.name }} · {{ t('modelPlaza.cards.standardPrice') }}<span v-if="peakNote"> · {{ peakNote }}</span></p>
       <PlazaModelPricingTable
-        v-if="group.models.length > 0"
-        :models="group.models"
+        v-if="selectedModel"
+        :models="[selectedModel]"
         :platform="group.platform"
         :rate-multiplier="group.rate_multiplier"
         :user-rate-multiplier="group.user_rate_multiplier ?? null"
@@ -70,20 +75,21 @@
         :peak-window="peakWindow"
         :peak-rate-multiplier="group.peak_rate_multiplier"
       />
-      <p v-else class="px-5 py-4 text-center text-sm text-gray-400 dark:text-dark-500">
-        {{ t('modelPlaza.detail.noModels') }}
-      </p>
-    </div>
+      </div>
+    </BaseDialog>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import GroupBadge from '@/components/common/GroupBadge.vue'
 import PlazaModelPricingTable from './PlazaModelPricingTable.vue'
-import type { ModelPlazaGroup } from '@/api/modelPlaza'
+import PlazaModelCard from './PlazaModelCard.vue'
+import BaseDialog from '@/components/common/BaseDialog.vue'
+import { usePlazaPricing } from '@/composables/usePlazaPricing'
+import type { ModelPlazaGroup, PlazaModel } from '@/api/modelPlaza'
 import type { GroupPlatform, SubscriptionType } from '@/types'
 import { platformLabel } from '@/utils/platformColors'
 import { hasPeakRate, formatPeakRateWindow, serverTimezoneLabel } from '@/utils/peak-rate'
@@ -95,6 +101,11 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const selectedModel = ref<PlazaModel | null>(null)
+const { sortedModels } = usePlazaPricing({
+  get models() { return props.group.models },
+  get rateMultiplier() { return props.group.rate_multiplier }
+})
 
 /** 高峰窗口描述(含倍率与服务器时区标注);分组未启用高峰为空串。 */
 const peakWindow = computed(() => {

@@ -676,6 +676,7 @@ export default {
       exclusive: '专属分组',
       subscription: '订阅'
     },
+    cards: { copy: '复制模型名', copyName: '复制 {name} 的模型名', details: '价格详情', detailsFor: '查看 {name} 的价格详情', standardPrice: '标准时段实付', perMillion: 'USD / 百万 tokens', requestPricing: '按模型计费单位', tiered: '阶梯价格，查看详情', },
     detail: {
       modelCount: '{count} 个模型',
       noModels: '该分组暂未配置模型',

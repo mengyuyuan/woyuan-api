@@ -671,6 +671,7 @@ export default {
       exclusive: 'Exclusive',
       subscription: 'Subscription'
     },
+    cards: { copy: 'Copy model name', copyName: 'Copy model name for {name}', details: 'Pricing details', detailsFor: 'View pricing details for {name}', standardPrice: 'Standard period price', perMillion: 'USD / million tokens', requestPricing: 'Per model billing unit', tiered: 'Tiered pricing, see details', },
     detail: {
       modelCount: '{count} models',
       noModels: 'No models configured for this group',
