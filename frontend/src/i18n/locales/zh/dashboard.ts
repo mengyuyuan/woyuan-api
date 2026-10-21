@@ -662,12 +662,14 @@ export default {
     loadFailed: '加载模型广场失败',
     noSearchResult: '没有匹配的模型',
     anonymousHint: '登录后可查看你的专属分组与专属倍率',
+    summary: { groups: '分组', models: '模型', pricingTable: '模型价格表，可横向滚动' },
     filters: {
       platformLabel: '平台',
       groupLabel: '分组',
       rateLabel: '倍率',
       modelLabel: '模型',
       searchPlaceholder: '搜索模型名称',
+      clearSearch: '清空模型搜索',
       all: '全部'
     },
     badges: {
@@ -675,6 +677,7 @@ export default {
       subscription: '订阅'
     },
     detail: {
+      modelCount: '{count} 个模型',
       noModels: '该分组暂未配置模型',
       noPricing: '未配置定价',
       peakNote: '高峰时段 {window} 计费倍率 ×{multiplier}',

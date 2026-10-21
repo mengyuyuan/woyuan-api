@@ -657,12 +657,14 @@ export default {
     loadFailed: 'Failed to load model plaza',
     noSearchResult: 'No matching models',
     anonymousHint: 'Sign in to see your exclusive groups and personal rates',
+    summary: { groups: 'Groups', models: 'Models', pricingTable: 'Model pricing table, scroll horizontally' },
     filters: {
       platformLabel: 'Platform',
       groupLabel: 'Group',
       rateLabel: 'Rate',
       modelLabel: 'Model',
       searchPlaceholder: 'Search models',
+      clearSearch: 'Clear model search',
       all: 'All'
     },
     badges: {
@@ -670,6 +672,7 @@ export default {
       subscription: 'Subscription'
     },
     detail: {
+      modelCount: '{count} models',
       noModels: 'No models configured for this group',
       noPricing: 'Pricing not configured',
       peakNote: 'Peak hours {window}: billing rate ×{multiplier}',

@@ -1,5 +1,5 @@
 <template>
-  <div class="plaza-pricing-table overflow-x-auto" :style="accentStyle">
+  <div class="plaza-pricing-table overflow-x-auto" :style="accentStyle" tabindex="0" role="region" :aria-label="t('modelPlaza.summary.pricingTable')">
     <table class="w-full min-w-[1000px] table-auto border-collapse text-sm tabular-nums">
       <colgroup>
         <col class="w-[25%]" />
@@ -309,7 +309,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { formatScaled, resolveIntervalPrices } from '@/utils/pricing'
-import { platformAccentColor, platformBadgeLightClass, platformLabel } from '@/utils/platformColors'
+import { platformBadgeLightClass, platformLabel } from '@/utils/platformColors'
 import {
   BILLING_MODE_TOKEN,
   BILLING_MODE_IMAGE,
@@ -356,7 +356,7 @@ const props = defineProps<{
 const { t } = useI18n()
 
 /** 实付分区只从平台拿一个主色,浅底/标题/下划线全部由 scoped CSS 用 color-mix 派生。 */
-const accentStyle = computed(() => ({ '--plaza-accent': platformAccentColor(props.platform ?? '') }))
+const accentStyle = { '--plaza-accent': '#2354f4' }
 
 const PER_MILLION = 1_000_000
 

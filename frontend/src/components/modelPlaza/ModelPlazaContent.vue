@@ -1,22 +1,23 @@
 <template>
-  <div class="space-y-5">
+  <div class="wy-plaza space-y-5">
     <!-- 页头(独立形态下展示标题;后台形态 AppHeader 已有页面标题) -->
-    <div v-if="!embedded">
-      <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">{{ t('modelPlaza.title') }}</h1>
-      <p class="mt-1.5 text-sm text-gray-500 dark:text-dark-400">{{ t('modelPlaza.description') }}</p>
+    <div v-if="!embedded" class="wy-plaza-heading">
+      <div><p class="wy-plaza-eyebrow" aria-hidden="true">WOYUAN / MODEL LIBRARY</p><h1>{{ t('modelPlaza.title') }}</h1><p class="wy-plaza-intro">{{ t('modelPlaza.description') }}</p></div>
+      <dl v-if="response && !loading" class="wy-plaza-summary"><div><dt>{{ t('modelPlaza.summary.groups') }}</dt><dd>{{ response.groups.length }}</dd></div><div><dt>{{ t('modelPlaza.summary.models') }}</dt><dd>{{ modelCount }}</dd></div></dl>
     </div>
+    <div v-else class="wy-plaza-embedded-heading"><p class="wy-plaza-eyebrow" aria-hidden="true">WOYUAN / MODEL LIBRARY</p><p v-if="response && !loading">{{ response.groups.length }} {{ t('modelPlaza.summary.groups') }}<span aria-hidden="true"> / </span>{{ modelCount }} {{ t('modelPlaza.summary.models') }}</p></div>
 
     <!-- 全局价格说明(管理员配置,Markdown) -->
     <div
       v-if="descriptionHtml"
-      class="plaza-description rounded-2xl border border-gray-100 bg-white px-5 py-4 text-sm shadow-card dark:border-dark-700/50 dark:bg-dark-800/50"
+      class="plaza-description wy-plaza-notice rounded-2xl border border-gray-100 bg-white px-5 py-4 text-sm shadow-card dark:border-dark-700/50 dark:bg-dark-800/50"
       v-html="descriptionHtml"
     ></div>
 
     <!-- 未登录提示 -->
     <p
       v-if="!isAuthenticated"
-      class="flex items-center gap-1.5 text-xs text-gray-400 dark:text-dark-500"
+      class="wy-plaza-auth-hint flex items-center gap-1.5 text-xs text-gray-400 dark:text-dark-500"
     >
       <Icon name="infoCircle" size="xs" class="h-3.5 w-3.5" />
       {{ t('modelPlaza.anonymousHint') }}
@@ -49,7 +50,7 @@
       />
 
       <!-- 分组分节的模型清单(默认按生效倍率升序) -->
-      <div v-if="filteredGroups.length > 0" class="space-y-5">
+      <div v-if="filteredGroups.length > 0" class="wy-plaza-groups space-y-5">
         <PlazaGroupSection v-for="g in filteredGroups" :key="g.id" :group="g" />
       </div>
       <div
@@ -84,6 +85,8 @@ const props = defineProps<{
 const { t } = useI18n()
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+const modelCount = computed(() => new Set((props.response?.groups ?? []).flatMap(group => group.models.map(model => model.name))).size)
 
 const selectedPlatform = ref<string>('all')
 const selectedGroupId = ref<number | 'all'>('all')
@@ -193,3 +196,5 @@ const filteredGroups = computed(() => {
   @apply my-2 border-l-4 border-gray-300 pl-3 text-gray-600 dark:border-dark-600 dark:text-dark-300;
 }
 </style>
+
+<style src="@/styles/woyuan-plaza.css"></style>
