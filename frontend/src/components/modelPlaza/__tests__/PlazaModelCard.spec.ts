@@ -47,6 +47,12 @@ describe('model card pricing and actions', () => {
     const wrapper = card({ ...model, pricing: null })
     expect(wrapper.findAll('dd').map(e => e.text())).toEqual(['-', '-'])
   })
+  it('labels the displayed media tier rather than presenting it as a flat price', () => {
+    const interval = { min_tokens: 0, max_tokens: null, tier_label: 'HD', input_price: null, output_price: null, cache_write_price: null, cache_read_price: null, per_request_price: 0.25 }
+    const wrapper = card({ ...model, pricing: { ...model.pricing!, billing_mode: 'image', intervals: [interval] } })
+    expect(wrapper.find('.wy-model-price-caption').text()).toContain('HD')
+    expect(wrapper.find('dd').text()).toContain('$0.50')
+  })
   it('copies the exact model name and opens details for that model', async () => {
     const wrapper = card()
     await wrapper.find('.wy-model-copy').trigger('click')

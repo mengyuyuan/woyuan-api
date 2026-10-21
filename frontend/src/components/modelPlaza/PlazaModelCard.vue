@@ -9,7 +9,7 @@
       <p>{{ group.name }}</p>
     </div>
     <div class="wy-model-card-pricing">
-      <p class="wy-model-price-caption">{{ t('modelPlaza.cards.standardPrice') }}<span v-if="firstTier"> · {{ tierLabel(firstTier) }}</span></p>
+      <p class="wy-model-price-caption">{{ t('modelPlaza.cards.standardPrice') }}<span v-if="priceTier"> · {{ tierLabel(priceTier) }}</span></p>
       <dl v-if="isToken" class="wy-model-price-pair">
         <div><dt>{{ t('modelPlaza.table.input') }}</dt><dd>{{ paidPerMillion(firstTier ? firstTier.input_price : model.pricing?.input_price) }}</dd></div>
         <div><dt>{{ t('modelPlaza.table.output') }}</dt><dd>{{ paidPerMillion(firstTier ? firstTier.output_price : model.pricing?.output_price) }}</dd></div>
@@ -59,6 +59,7 @@ const { billingMode, billingModeLabel, paidPerMillion, paidRequestPrice, perUnit
 const isToken = computed(() => billingMode(props.model) === BILLING_MODE_TOKEN)
 const firstTier = computed(() => isToken.value ? pricing.tokenIntervals(props.model)[0] : undefined)
 const requestTier = computed(() => [...pricing.requestIntervals(props.model)].sort((a, b) => a.min_tokens - b.min_tokens)[0])
+const priceTier = computed(() => isToken.value ? firstTier.value : requestTier.value)
 const hasTiers = computed(() => (isToken.value ? pricing.tokenIntervals(props.model) : pricing.requestIntervals(props.model)).length > 1)
 const cardRate = computed(() => isToken.value ? pricing.effectiveRate.value : pricing.requestRate(props.model))
 </script>
